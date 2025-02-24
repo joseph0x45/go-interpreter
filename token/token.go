@@ -10,8 +10,7 @@ type Token struct {
 }
 
 func (t *Token) Display() {
-	fmt.Printf("TokenType: %v\n", t.Type)
-	fmt.Printf("TokenLiteral: %v\n", t.Literal)
+	fmt.Printf("%+v\n", t)
 }
 
 const (
