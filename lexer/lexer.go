@@ -7,6 +7,7 @@ import (
 
 type Lexer struct {
 	input        string
+	inputSize    int
 	position     int  //current position in input. Points to current character
 	readPosition int  //current reading readPosition. Points after current character
 	ch           byte //current character
@@ -22,14 +23,21 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= l.inputSize {
+		return 0
+	}
+	return l.input[l.readPosition]
+}
+
 func New(input string) *Lexer {
-	l := &Lexer{input: input}
+	l := &Lexer{input: input, inputSize: len(input)}
 	l.readChar()
 	return l
 }
 
 func (l *Lexer) readChar() {
-	if l.readPosition >= len(l.input) {
+	if l.readPosition >= l.inputSize {
 		l.ch = 0
 	} else {
 		l.ch = l.input[l.readPosition]
@@ -74,6 +82,11 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 	switch l.ch {
 	case '=':
+		if l.peekChar() == '=' {
+			t = token.Token{Type: token.EQUAL, Literal: "=="}
+			l.readChar()
+			break
+		}
 		t = newToken(token.ASSIGN, l.ch)
 	case ';':
 		t = newToken(token.SEMICOLON, l.ch)
@@ -89,6 +102,23 @@ func (l *Lexer) NextToken() token.Token {
 		t = newToken(token.LBRACE, l.ch)
 	case '}':
 		t = newToken(token.RBRACE, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			t = token.Token{Type: token.NOT_EQUAL, Literal: "!="}
+			l.readChar()
+			break
+		}
+		t = newToken(token.BANG, l.ch)
+	case '*':
+		t = newToken(token.ASTERISK, l.ch)
+	case '<':
+		t = newToken(token.LESS_THAN, l.ch)
+	case '>':
+		t = newToken(token.GREATER_THAN, l.ch)
+	case '-':
+		t = newToken(token.MINUS, l.ch)
+	case '/':
+		t = newToken(token.SLASH, l.ch)
 	case 0:
 		t.Literal = ""
 		t.Type = token.EOF
